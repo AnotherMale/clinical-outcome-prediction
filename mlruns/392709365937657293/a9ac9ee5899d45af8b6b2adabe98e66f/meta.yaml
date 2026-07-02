@@ -1,0 +1,14 @@
+artifact_uri: file:C:\Users\ohriv\Downloads\clinical-outcome-prediction\mlruns/392709365937657293/a9ac9ee5899d45af8b6b2adabe98e66f/artifacts
+end_time: 1783003911390
+entry_point_name: ''
+experiment_id: '392709365937657293'
+lifecycle_stage: active
+run_id: a9ac9ee5899d45af8b6b2adabe98e66f
+run_name: explain_CatBoost
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1783003910991
+status: 3
+tags: []
+user_id: ohriv

@@ -2,6 +2,7 @@
   "target": "readmitted_30d",
   "group_col": "desynpuf_id",
   "best_model_name": "CatBoost",
+  "decision_threshold": 0.08693263973821538,
   "categorical_features": [
     "bene_sex_ident_cd",
     "bene_race_cd",

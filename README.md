@@ -148,6 +148,6 @@ To make the project more realistic and maintainable, experiment trackingwas inco
 
 This project has several limitations. First, the data is synthetic, so the results should not be interpreted as a clinical prediction tool. Second, claims data do not contain rich real-time clinical signals such as vitals, lab trends, or notes, which may limit predictive power. Third, readmission is influenced by many external factors, including care access, socioeconomic context, and hospital-specific discharge practices, which are only partially represented in claims data. Finally, performance may vary across different target definitions, feature sets, and splitting strategies.
 
-## Conclusion
+## Conclusion (needs updating for explainability)
 
 This project demonstrates a complete healthcare machine learning workflow using CMS synthetic claims data. Starting from raw beneficiary and inpatient files, the project cleaned and harmonized longitudinal claims records, engineered temporal and utilization features, trained and compared multiple machine learning models, and evaluated them using metrics appropriate for an imbalanced outcome. The final CatBoost model achieved a ROC-AUC of 0.892 and a PR-AUC of 0.393 on a dataset with 4.3% positive prevalence. Beyond model performance, the project emphasizes reproducibility, patient-level data leakage prevention, explainability, and experiment tracking.

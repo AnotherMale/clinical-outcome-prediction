@@ -237,36 +237,73 @@ It should be noted that because Precision-Recall AUC was the primary evaluation 
 </tr>
 </table>
 
-## Explainability
+## Model Explainability
 
-Talk about:
+For model transparency, the final model was analyzed using SHAP (SHapley Additive exPlanations), quantifying how much each feature contributes to an individual prediction while also providing a broader view of feature importance across the dataset.
 
-- Global feature importance summaries
-- Feature attribution plots
-- Patient-level explanations for representative examples
-- Comparisons between true positives, false positives, false negatives, and true negatives
+### Global Feature Attribution
 
-Answer:
+Global SHAP analysis identified features that most strongly influenced predictions across all patients. Temporal utilization variables -- such days since previous admission, number of prior admissions, and the duration of the previous stay were among the most influential patterns. Clinical characteristics, including the number of chronic condition indicators (represented in comorbidity count) and diagnosis groups also contributed substantially to predicted readmission risk, although less so than the temporal variables.
 
-- Which features most strongly influence readmission risk?
-- Do recent admissions and utilization history matter more than demographics?
-- Are the model's explanations plausible?
+The global feature importance summary confirmed that the model relied primarily on clinically plausible predictors rather than demographic variables alone, increasing confidence that the relationships learned by the model align with expected heuristics regarding recent hospitalizations and greater disease burden.
 
-SUGGESTED FIGURE INSERTIONS:
+The SHAP bar plot below provides a simplified ranking of the features with the greatest overall impact on model predictions.
 
-- SHAP summary plot
-- SHAP bar plot for global feature importance
-- SHAP waterfall plot for arepresentative patient
-- Example explanations for one false positive and one false negative
+![SHAP Bar Plot](reports/figures/explainability/shap_bar_catboost.png)
+
+The SHAP summary plot below shows the destribution and magnitude of feature contributions across the evaluation dataset.
+
+![SHAP Summary Plot](reports/figures/explainability/shap_summary_catboost.png)
+
+### Patient-Level Explanations
+
+In addition to global interpretation, SHAP was used to explain individual predictions. Waterfall plots illustrate how specific patient characteristics increase or decrease the predicted probability of a readmission in 30 days. Features pushing the prediction toward higher readmission risk are shown as positive contributions, while features pushing the prediction toward lower risk reduce the prediction.
+
+For example, a patient-level explanation can reveal whether factors such as recent hospitalization history, prior admissions, length of stay, comorbidity burden, utilization, and diagnosis groups conributed to an elevated predicted risk.
+
+Representative examples were generated for true positives, false positives, true negatives, and false negatives to better understand model behavior and identify common sources of prediction error across different model outcomes.
+
+Again, the waterfall plots below merely describe how the model arrives at a prediction; they do not establish that a feature cause the patient's readmission. Thus, these explanations should be interpreted as model behavior rather than clinical causality. As one can see, for true positives, length of stay seems to be an important feature, but for false positives, true negatives, and false negatives, prior admissions seems to be a more important feature. Perhaps one should be wary when prior admissions plays a larger role than length of stay on predicting the target feature values of unseen data.
+
+![SHAP Waterfall Plots](reports/figures/explainability/waterfall_true_positive.png)
+
+![SHAP Waterfall Plots](reports/figures/explainability/waterfall_true_negative.png)
+
+![SHAP Waterfall Plots](reports/figures/explainability/waterfall_false_positive.png)
+
+![SHAP Waterfall Plots](reports/figures/explainability/waterfall_false_negative.png)
 
 ## Experiment Tracking and Reproducibility
 
-To make the project more realistic and maintainable, experiment trackingwas incorporated using MLflow. This allows model metrics, parameters, and artifacts to be logged consistently across runs. The model also saves model artifacts and metadata, including the final model file, cross-validation results, holdout metrics, and model configuration information. Maybe there's something to talk about here?
+To improve experiment traceability and model reproducibility from feature preparation and model selection through final evaluation and explainability, MLflow was incorporated into the modeling workflow. Model runs can be tracked with their associated parameters, evaluation metrics, metadata, and output artifacts, making it possible to compare experiments and maintain a record of how results were produced.
+
+Such key model artifacts and metadata include:
+ - Final trained model
+ - Cross-validation performance metrics
+ - Holdout test-set metrics and predictions
+ - Selected decision threshold
+ - Model name and configuration
+ - Categorical and numerical feature lists
+ - SHAP feature-importance results and explainability figures
+
+The modeling workflow uses fixed random seeds and 5-fold Stratified Group Cross-Validation at the beneficiary level to make evaluation consistent and prevent patient-level data leakage between folds. 
 
 ## Limitations
 
-This project has several limitations. First, the data is synthetic, so the results should not be interpreted as a clinical prediction tool. Second, claims data do not contain rich real-time clinical signals such as vitals, lab trends, or notes, which may limit predictive power. Third, readmission is influenced by many external factors, including care access, socioeconomic context, and hospital-specific discharge practices, which are only partially represented in claims data. Finally, performance may vary across different target definitions, feature sets, and splitting strategies.
+This project ahs several important limitations that should be considered when interpreting the results. 
 
-## Conclusion (needs updating for explainability)
+First, the analysis uses CMS synthetic claims data. Although th edataset provides a realistic environment for developing and evaluating a healthcare machine learning workflow, model performance should not be interpreted as evidence of clinical effectiveness or expected performance on real patient populations.
+
+Second, claims data primarily captures diagnoses, procedures, utilization, and administrative information. They do not provide many potentially predictive clinical signals scuh as laboratory values, vital signs, medications, clinical notes, or detailed measures of patient condition. Nor do they provide factors that may not be captured in claims data at all, including social determinants of health, access to follow-up care, medication adherence, caregiver support, and hospital-specific discharge and care-coordination practices. The absense of these variables may limit predictive performance.
+
+Third, the model should be interpreted according to the point in the care process at which length of stay and utilization measures become available.
+
+Fourth, only 4.3% of observations represent 30-day readmissions. This imbalance makes accuracy a poor primary metric an dcreates an inherent precision-recall tradeoff. The model's decision threshold was therefore selected with an emphasis on recall, and the resulting precision should be considered when interpreting potential use cases.
+
+Fifth, the final model was evaluated using a held-out subset of the same underlying dataset. Although beneficiary-level grouping was used to reduce information leakage, performance has not been independently validated on a separate real-world population or external dataset.
+
+Sixth, results may vary depending on the definition of 30-day readmission, feature engineering decisions, preprocessing methods, model hyperparameters, decision threshold, and train/test splitting strategies.
+
+## Conclusion
 
 This project demonstrates a complete healthcare machine learning workflow using CMS synthetic claims data. Starting from raw beneficiary and inpatient files, the project cleaned and harmonized longitudinal claims records, engineered temporal and utilization features, trained and compared multiple machine learning models, and evaluated them using metrics appropriate for an imbalanced outcome. The final CatBoost model achieved a ROC-AUC of 0.892 and a PR-AUC of 0.393 on a dataset with 4.3% positive prevalence. Beyond model performance, the project emphasizes reproducibility, patient-level data leakage prevention, explainability, and experiment tracking.
